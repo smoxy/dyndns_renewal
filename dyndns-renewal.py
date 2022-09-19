@@ -1,6 +1,5 @@
 from genericpath import isfile
 from xmlrpc.client import DateTime
-from webdriver_manager.chrome import ChromeDriverManager
 
 import sqlite3
 
@@ -8,10 +7,10 @@ from logging import raiseExceptions
 
 import datetime
 import os
-import tkinter as tk
 import configparser
 import getopt
 import sys
+import platform
 
 from time import sleep
 
@@ -26,12 +25,11 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-V="0.2"
+V="0.21"
 shortopts = '''hlciV''' #if after the letter there is ':' so the argument is required
 longopts = ["help", "headless", "cookiesless", "noimage", "version"] #if after name variable ther is '=' so the argument is required
 
-def create_db(con):
-    cur = con.cursor()
+def create_db(cur):
     cur.execute('''CREATE TABLE renews(
     datetime NUMERIC PRIMARY KEY,
     action TEXT
@@ -72,14 +70,17 @@ def getDriver(headless, noimage):
     #chrome_options.add_argument("user-data-dir=selenium")
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument("--incognito")
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+
+    if not ('raspi' in platform.platform() or 'aarch' in platform.platform()):
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    else:
+        driver = webdriver.Chrome(service=Service('/usr/lib/chromium-browser/chromedriver'), options=chrome_options)
     
     sleep(2)
     return driver
 
 
-def renew_service(driver, con):
-    cur = con.cursor()    
+def renew_service(driver, con, cur):
     #TODO click su renew service ogni domenica
     try:
         driver.find_element(By.CSS_SELECTOR, "button.ddns-button.clr-azzurro[value='confirmHost']").click()
@@ -96,9 +97,8 @@ def renew_service(driver, con):
         return False
         
 
-def login(config, con, headless, cookiesless, noimage):
+def login(config, con, cur, headless, cookiesless, noimage):
     config.read('./.settings/config.ini')
-    cur = con.cursor()
 
     driver = getDriver(headless, noimage)
     if not cookiesless:
@@ -152,7 +152,7 @@ def login(config, con, headless, cookiesless, noimage):
     #res = cur.execute('''SELECT datetime FROM renews WHERE action=="Confermed" ORDER BY datetime DESC;''')
     #date = datetime.datetime.strptime(res.fetchone()[0], "%Y-%m-%d %H:%M:%S")
     if (datetime.datetime.utcnow()-lastConfirm).days > 20:
-        renew_service(driver)
+        renew_service(driver, con, cur)
     
     return driver
 
@@ -220,15 +220,16 @@ def main(headless, cookiesless, noimage):
 
     isdb = os.path.isfile('dyndns.db')
     con = sqlite3.connect('dyndns.db')
+    cur = con.cursor()
     if not isdb:
-        create_db(con, config)
+        create_db(cur)
     if not os.path.isfile('./.settings/config.ini'):
         set_data(config, headless)
     
     done = False
     while not done:
         try:
-            login(config, con, headless, cookiesless, noimage)
+            login(config, con, cur, headless, cookiesless, noimage)
             done = True
         except KeyError:
             set_data(config, headless, error=True)
@@ -261,8 +262,19 @@ if __name__ == "__main__":
                 version()
                 doexit = True
 
+        if not headless:
+            import tkinter as tk
+
+        if not ('raspi' in platform.platform() or 'aarch' in platform.platform()):
+            from webdriver_manager.chrome import ChromeDriverManager
+
         if not doexit:
             main(headless=headless, cookiesless=cookiesless, noimage=noimage)
+    except ModuleNotFoundError as e:
+        if 'tkinter' in str(e):
+            print(f"[!] {e}\n[!] Use with -l or --headless option!")
+        print("[i] Gracefully exit")
+        quit()
     except KeyboardInterrupt:
         print("[i] Gracefully exit")
         quit()

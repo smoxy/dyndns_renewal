@@ -15,6 +15,5 @@ Released under the GNU GPLv2.
     webdriver-manager (non serve su aarch)
 
 ## Guida per configurare il raspberry:
-    sudo apt install python3-pip
     sudo apt install chromium-browser -y
     sudo apt install chromium-chromedriver -y

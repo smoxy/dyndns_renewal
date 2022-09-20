@@ -107,7 +107,7 @@ def login(config, con, cur, headless, cookiesless, noimage):
             cookies = pickle.load(open("./.settings/dyndns.pkl", "rb"))
         except FileNotFoundError:
             driver.close()
-            login(config, headless, cookiesless=False)
+            login(config, con, cur, headless, cookiesless=False, noimage=noimage)
         driver.get("https://dyndns.it/host-management/")
         driver.delete_all_cookies()
         for cookie in cookies:
@@ -145,7 +145,7 @@ def login(config, con, cur, headless, cookiesless, noimage):
         except TimeoutException:
             driver.close()
             if cookiesless:
-                login(config, headless, cookiesless=False)
+                login(config, con, cur, headless, cookiesless=False, noimage=noimage)
             cur.execute('''INSERT INTO renews(datetime, action) VALUES(?,?);''', (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "ERROR: Confirm page Not Found"))
             con.commit()            
             raiseExceptions("ERROR: Confirm page Not Found")

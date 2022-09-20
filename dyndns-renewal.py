@@ -25,7 +25,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-V="0.21"
+V="0.2.1"
 shortopts = '''hlciV''' #if after the letter there is ':' so the argument is required
 longopts = ["help", "headless", "cookiesless", "noimage", "version"] #if after name variable ther is '=' so the argument is required
 
@@ -49,6 +49,7 @@ Released under the GNU GPLv2.
     -i --noimage            Reduce bandwidth waste disabling image loading
     -V --version            Print version info
     """)
+
 def version():
     print(f"dyndns-renewal {V}")
 

@@ -9,3 +9,11 @@ Released under the GNU GPLv2.
     -c --cookiesless        Try to login preferring user and password avery time inputting instead of automatic cookies login
     -i --noimage            Reduce bandwidth waste disabling image loading
     -V --version            Print version info
+
+## pacchetti da installare
+    selenium
+    webdriver-manager (non serve su aarch)
+
+## Guida per configurare il raspberry:
+    sudo apt install chromium-browser -y
+    sudo apt install chromium-chromedriver -y

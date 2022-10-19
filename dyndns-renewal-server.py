@@ -11,7 +11,6 @@ import configparser
 import getopt
 import sys
 import platform
-import logging
 
 from time import sleep
 
@@ -26,10 +25,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-V="0.2.2"
-#formatter = logging.Formatter('[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s','%m-%d %H:%M:%S')
-logging.basicConfig(filename=r'log.log', encoding='utf-8', format='[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s', level=logging.INFO) #'%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-
+V="0.2"
 shortopts = '''hlciV''' #if after the letter there is ':' so the argument is required
 longopts = ["help", "headless", "cookiesless", "noimage", "version"] #if after name variable ther is '=' so the argument is required
 
@@ -53,7 +49,6 @@ Released under the GNU GPLv2.
     -i --noimage            Reduce bandwidth waste disabling image loading
     -V --version            Print version info
     """)
-
 def version():
     print(f"dyndns-renewal {V}")
 
@@ -88,24 +83,21 @@ def getDriver(headless, noimage):
 def renew_service(driver, con, cur):
     #TODO click su renew service ogni domenica
     try:
-        t_now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         driver.find_element(By.CSS_SELECTOR, "button.ddns-button.clr-azzurro[value='confirmHost']").click()
         lastConfirm = datetime.datetime.strptime(WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "span#lastConfirm").text, "%d-%m-%Y %H:%M:%S")))
         try:
-            logging.info(f'\t{t_now}\tlastConfirm: {lastConfirm}')
             cur.execute('''INSERT INTO renews(datetime, action) VALUES(?,?);''', (lastConfirm, "Confermed"))
             con.commit()
         except sqlite3.IntegrityError:
             pass
         return True
     except NoSuchElementException:
-        logging.error(f'\t{t_now}\tERROR: Confirm button Not Found')
-        cur.execute('''INSERT INTO renews(datetime, action) VALUES(?,?);''', (t_now, "ERROR: Confirm button Not Found"))
+        cur.execute('''INSERT INTO renews(datetime, action) VALUES(?,?);''', (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "ERROR: Confirm button Not Found"))
         con.commit()
         return False
         
 
-def login(config, con, cur, headless, cookiesless, noimage, c: int=0):
+def login(config, con, cur, headless, cookiesless, noimage):
     config.read('./.settings/config.ini')
 
     driver = getDriver(headless, noimage)
@@ -114,7 +106,7 @@ def login(config, con, cur, headless, cookiesless, noimage, c: int=0):
             cookies = pickle.load(open("./.settings/dyndns.pkl", "rb"))
         except FileNotFoundError:
             driver.close()
-            login(config, con, cur, headless, cookiesless=False, noimage=noimage)
+            login(config, headless, cookiesless=False)
         driver.get("https://dyndns.it/host-management/")
         driver.delete_all_cookies()
         for cookie in cookies:
@@ -131,10 +123,8 @@ def login(config, con, cur, headless, cookiesless, noimage, c: int=0):
         sleep(1)
         driver.find_element(By.XPATH, "//button[@title='Login']").click()
         try:
-            msg = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.ddns-div-table.ddns-msg.ddns-error")))
-            msg = msg.find_element(By.CSS_SELECTOR, "div.ddns-table-cell.span_10")
-            if 'password' in (msg.text).lower():
-                raise KeyError
+            WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.ddns-div-table.ddns-msg.ddns-error")))
+            raise KeyError
         except TimeoutException:
             pass
         with open("./.settings/dyndns.pkl","wb") as cookie_file:
@@ -147,7 +137,6 @@ def login(config, con, cur, headless, cookiesless, noimage, c: int=0):
             #lastConfirm = datetime.datetime.strptime(driver.find_element(By.CSS_SELECTOR, "span#lastConfirm").text, "%d-%m-%Y %H:%M:%S")
             lastConfirm = datetime.datetime.strptime(WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "span#lastConfirm"))).text, "%d-%m-%Y %H:%M:%S")
             try:
-                logging.info(f'\tlastConfirm: {lastConfirm}')
                 cur.execute('''INSERT INTO renews(datetime, action) VALUES(?,?);''', (lastConfirm, "Confermed"))
                 con.commit()
             except sqlite3.IntegrityError:
@@ -155,12 +144,7 @@ def login(config, con, cur, headless, cookiesless, noimage, c: int=0):
         except TimeoutException:
             driver.close()
             if cookiesless:
-                c = c+1
-                login(config, con, cur, headless, cookiesless=False, noimage=noimage, c=c)
-            elif c<2:
-                c = c+1
-                login(config, con, cur, headless, cookiesless=True, noimage=noimage, c=c)
-            logging.error(f'\tERROR: Confirm page Not Found')
+                login(config, headless, cookiesless=False)
             cur.execute('''INSERT INTO renews(datetime, action) VALUES(?,?);''', (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "ERROR: Confirm page Not Found"))
             con.commit()            
             raiseExceptions("ERROR: Confirm page Not Found")

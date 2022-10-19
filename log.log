@@ -1,0 +1,12 @@
+[2022-10-19 15:50:37,912] p7288 {C:\Users\smoxy\Documents\Coding\PyVenv\selenium\lib\site-packages\webdriver_manager\core\logger.py:11} INFO - ====== WebDriver manager ======
+[2022-10-19 15:50:39,370] p7288 {C:\Users\smoxy\Documents\Coding\PyVenv\selenium\lib\site-packages\webdriver_manager\core\logger.py:11} INFO - Get LATEST chromedriver version for google-chrome 106.0.5249
+[2022-10-19 15:50:41,116] p7288 {C:\Users\smoxy\Documents\Coding\PyVenv\selenium\lib\site-packages\webdriver_manager\core\logger.py:11} INFO - Driver [C:\Users\smoxy\.wdm\drivers\chromedriver\win32\106.0.5249\chromedriver.exe] found in cache
+[2022-10-19 15:51:12,970] p7288 {C:\Users\smoxy\Documents\Coding\PyVenv\selenium\lib\site-packages\webdriver_manager\core\logger.py:11} INFO - ====== WebDriver manager ======
+[2022-10-19 15:51:15,015] p7288 {C:\Users\smoxy\Documents\Coding\PyVenv\selenium\lib\site-packages\webdriver_manager\core\logger.py:11} INFO - Get LATEST chromedriver version for google-chrome 106.0.5249
+[2022-10-19 15:51:17,298] p7288 {C:\Users\smoxy\Documents\Coding\PyVenv\selenium\lib\site-packages\webdriver_manager\core\logger.py:11} INFO - Driver [C:\Users\smoxy\.wdm\drivers\chromedriver\win32\106.0.5249\chromedriver.exe] found in cache
+[2022-10-19 15:51:37,817] p7288 {c:\Users\smoxy\Documents\Coding\py\dyndns_renewal\dyndns-renewal.py:153} INFO - 	lastConfirm: 2022-10-19 21:45:14
+[2022-10-19 15:51:39,915] p7288 {c:\Users\smoxy\Documents\Coding\py\dyndns_renewal\dyndns-renewal.py:166} ERROR - 	ERROR: Confirm page Not Found
+[2022-10-19 16:02:19,488] p14828 {C:\Users\smoxy\Documents\Coding\PyVenv\selenium\lib\site-packages\webdriver_manager\core\logger.py:11} INFO - ====== WebDriver manager ======
+[2022-10-19 16:02:21,081] p14828 {C:\Users\smoxy\Documents\Coding\PyVenv\selenium\lib\site-packages\webdriver_manager\core\logger.py:11} INFO - Get LATEST chromedriver version for google-chrome 106.0.5249
+[2022-10-19 16:02:22,759] p14828 {C:\Users\smoxy\Documents\Coding\PyVenv\selenium\lib\site-packages\webdriver_manager\core\logger.py:11} INFO - Driver [C:\Users\smoxy\.wdm\drivers\chromedriver\win32\106.0.5249\chromedriver.exe] found in cache
+[2022-10-19 16:02:45,521] p14828 {c:\Users\smoxy\Documents\Coding\py\dyndns_renewal\dyndns-renewal.py:153} INFO - 	lastConfirm: 2022-10-19 21:45:14

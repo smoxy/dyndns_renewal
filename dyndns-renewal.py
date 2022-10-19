@@ -133,8 +133,11 @@ def login(config, con, cur, headless, cookiesless, noimage, c: int=0):
         try:
             msg = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.ddns-div-table.ddns-msg.ddns-error")))
             msg = msg.find_element(By.CSS_SELECTOR, "div.ddns-table-cell.span_10")
-            if 'password' in (msg.text).lower():
+            msg = msg.text
+            print(msg)
+            if 'password' in (msg).lower():
                 raise KeyError
+            sleep(60)
         except TimeoutException:
             pass
         with open("./.settings/dyndns.pkl","wb") as cookie_file:
@@ -156,10 +159,10 @@ def login(config, con, cur, headless, cookiesless, noimage, c: int=0):
             driver.close()
             if cookiesless:
                 c = c+1
-                login(config, con, cur, headless, cookiesless=False, noimage=noimage, c=c)
+                return login(config, con, cur, headless, cookiesless=False, noimage=noimage, c=c)
             elif c<2:
                 c = c+1
-                login(config, con, cur, headless, cookiesless=True, noimage=noimage, c=c)
+                return login(config, con, cur, headless, cookiesless=True, noimage=noimage, c=c)
             logging.error(f'\tERROR: Confirm page Not Found')
             cur.execute('''INSERT INTO renews(datetime, action) VALUES(?,?);''', (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "ERROR: Confirm page Not Found"))
             con.commit()            
